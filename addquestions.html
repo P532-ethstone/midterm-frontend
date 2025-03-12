@@ -38,7 +38,7 @@
             <label for="image">Upload Image:</label>
             <input type="file" id="image" name="image" accept="image/*">
 
-            <button onClick="addTheQuestion()" type="submit">Add Question</button>
+            <button onClick="addQuestion(event)" type="submit">Add Question</button>
         </form>
     </div>
     <div id="questions-container"></div>
@@ -54,7 +54,9 @@
             return result;
         }
 
-        async function addTheQuestion(){
+        async function addQuestion(event){
+            //allow image to upload
+            event.preventDefault();
             console.log("test")
             let message = "";
             let description = document.getElementById("question").value;
@@ -91,10 +93,12 @@
         async function submitTheImage(id, imageFile){
 			let formData = new FormData();
 			formData.append("file", imageFile);
+
 			let request = {
 				method: "POST",
 				body: formData
 			};
+
 			let response = await fetch(host + "/questions/" + id + "/image", request);
 			let result = await response.json();
             console.log("Image upload result: ", result);
