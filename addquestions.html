@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Quiz Add Question Page</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <nav>
+        <ul>
+			<li><a href="index.html">Home</a></li>
+            <li><a href="addquestions.html" class="active">Add Questions</a></li>
+            <li><a href="createquiz.html">Create a Quiz</a></li>
+            <li><a href="takequiz.html">Take a Quiz</a></li>
+        </ul>
+		<div class="about"><a href="about.html">About</a></div>
+    </nav>
+
+    <div class="form-container">
+        <h1>Add a Question</h1>
+        <form id="addQuestionForm">
+            <label for="question">Question:</label>
+            <input type="text" id="question" name="question" required>
+
+            <label for="optionA">Option A:</label>
+            <input type="text" id="optionA" name="optionA" required>
+
+            <label for="optionB">Option B:</label>
+            <input type="text" id="optionB" name="optionB" required>
+
+            <label for="optionC">Option C:</label>
+            <input type="text" id="optionC" name="optionC" required>
+
+            <label for="answer">Correct Answer:</label>
+            <input type="text" id="answer" name="answer" required>
+
+            <label for="image">Upload Image:</label>
+            <input type="file" id="image" name="image" accept="image/*">
+
+            <button onClick="addTheQuestion()" type="submit">Add Question</button>
+        </form>
+    </div>
+    <div id="questions-container"></div>
+
+    <script>
+        let host = "http://localhost:8080";
+        let questions = [];
+
+        async function getAll() {
+            let response = await fetch(host + "/questions");
+            let result = await response.json();
+            console.log(result);
+            return result;
+        }
+
+        async function addTheQuestion(){
+            console.log("test")
+            let message = "";
+            let description = document.getElementById("question").value;
+            let answer = document.getElementById("answer").value;
+            let choices = [document.getElementById("optionA").value, document.getElementById("optionB").value, document.getElementById("optionC").value]
+            let imageFile = document.getElementById("image").files[0];
+            let question = {description: description, answer: answer, choices: choices};
+
+            let request = {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(question),
+            };
+
+            let response = await fetch(host + "/questions", request);
+            if (response.status == 200) {
+                let id = await response.json();
+                let result = await submitTheImage(id, imageFile);
+                if (result) {
+                    message = "The question was added successfully!";
+                } 
+                else {
+                    message = "Something went wrong! Question image was not saved";
+                }
+            } 
+            else {
+                message = "Something went wrong! Question data could not be saved";
+            }
+            alert(message);
+        }
+
+        async function submitTheImage(id, imageFile){
+			let formData = new FormData();
+			formData.append("file", imageFile);
+			let request = {
+				method: "POST",
+				body: formData
+			};
+			let response = await fetch(host + "/questions/" + id + "/image", request);
+			let result = await response.json();
+            console.log("Image upload result: ", result);
+			return result;
+		}
+    </script>
+
+</body>
+</html>

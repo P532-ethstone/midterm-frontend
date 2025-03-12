@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Quiz Create Quiz page</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <nav>
+        <ul>
+			<li><a href="index.html">Home</a></li>
+            <li><a href="addquestions.html">Add Questions</a></li>
+            <li><a href="createquiz.html" class="active">Create a Quiz</a></li>
+            <li><a href="takequiz.html">Take a Quiz</a></li>
+        </ul>
+		<div class="about"><a href="about.html">About</a></div>
+    </nav>
+
+    <div class="main-container">
+        <div class="bank-container">
+            <h2>Questions Bank</h2>
+            <h3>Click on a question to add it to the quiz</h3>
+            <div id="questions-container" class="questions-bank"></div>
+        </div>
+
+        <div class="quiz">
+            <h3 id="header">New Quiz</h3>
+            <label for="title">Quiz title:</label>
+            <input type="text" id="title">
+            <button onclick="saveQuiz(false)">Save your changes</button>
+            <button onclick="saveQuiz(true)">Save this quiz and start a new one</button>
+            <h3>If you want to remove a question from the quiz, you can click on the question</h3>
+            <div id="quiz-questions" class="quiz-list"></div>
+        </div>
+    </div>
+
+    <div id="questions-container"></div>
+    <script>
+        let host = "http://localhost:8080";
+        let questions = [];
+        let container = document.getElementById("questions-container");
+
+        showQuestions();
+
+        let quiz = document.getElementById("quiz-questions");
+        let quizQuestions = [];
+        let quizId = null;
+        let header = document.getElementById("header");
+
+        async function getAll() {
+            let response = await fetch(host + "/questions");
+            let result = await response.json();
+            console.log(result);
+            return result;
+        }
+
+        async function showQuestions() {
+            container.innerHTML = "";
+            if (questions.length == 0) {
+                questions = await getAll();
+            }
+
+            for (let question of questions) {
+                let div = document.createElement("div");
+                div.className = "card";
+                
+                div.onclick = function () {
+                    //if it's in the question list add it to the quiz list
+                    if (div.parentNode.id == "questions-container") {
+                        quiz.appendChild(div);
+                        quizQuestions.push(question.id);
+                    } 
+                    //if it's in the quiz, remove it and put it back in the question list
+                    else {
+                        container.appendChild(div);
+                        const index = quizQuestions.indexOf(question.id);
+                        quizQuestions.splice(index, 1);
+                    }
+                    header.innerText = `New Quiz (${quiz.childElementCount} questions)`;
+                };
+
+                let innerHtml = `
+                <img class="card-img" src="http://localhost:8080/questions/${question.id}/image" alt="question" style="width:100%">
+                <div class="container">
+                <h4><b>${question.id}</b></h4> 
+                <p>${question.description}</p>
+                <form>
+                    <input type="radio" name="question-${question.id}" value="A">
+                    <label>${question.choices[0]}</label><br>
+
+                    <input type="radio" name="question-${question.id}" value="B">
+                    <label>${question.choices[1]}</label><br>
+
+                    <input type="radio" name="question-${question.id}" value="C">
+                    <label>${question.choices[2]}</label><br>       
+                </form> 
+                </div>`;
+                div.innerHTML = innerHtml;
+                container.appendChild(div);
+            }
+        }
+
+        async function saveQuiz(refresh){
+            let title = document.getElementById("title").value;
+            let url = "";
+            let request = {};
+            if (!quizId) {
+                url = host + "/quizzes";
+                request = {
+                    method: "POST",
+                    headers: {
+                    "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({"title": title, "questionIds": quizQuestions}),
+                };
+            } 
+            else {
+                url = host + "/quizzes/" + quizId;
+                request = {
+                    method: "PUT",
+                    headers: {
+                    "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({"id": quizId, "title": title, "questionIds": quizQuestions}),
+                };
+            }
+
+            let response = await fetch(url, request);
+            if(response.status == 200) {
+                quizId = await response.json();
+                alert("Quiz saved");
+            }
+            else {
+                alert("Something went wrong, the quiz was not saved")
+            }
+
+            //reload the page if clicked to start a new one
+            if(refresh){
+                location.href = "createquiz.html";
+            }
+        }
+    </script>
+</body>
+</html>

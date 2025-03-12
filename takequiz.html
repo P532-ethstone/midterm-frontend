@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Quiz Take Quiz Page</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <nav>
+        <ul>
+			<li><a href="index.html">Home</a></li>
+            <li><a href="addquestions.html">Add Questions</a></li>
+            <li><a href="createquiz.html">Create a Quiz</a></li>
+            <li><a href="takequiz.html" class="active">Take a Quiz</a></li>
+        </ul>
+		<div class="about"><a href="about.html">About</a></div>
+    </nav>
+
+    <div id="quiz-container" class="quizzes"></div>
+
+    <script>
+        let host = "http://localhost:8080";
+        let quizzes = [];
+        let container = document.getElementById("quiz-container");
+
+        showQuizzes();
+
+        async function getAll() {
+            let response = await fetch(host + "/quizzes");
+            let result = await response.json();
+            console.log(result);
+            return result
+        }
+
+        async function showQuizzes(){
+            container.innerHTML = "";
+            if (quizzes.length == 0) {
+                quizzes = await getAll();
+            }
+
+            for (let quiz of quizzes) {
+                let div = document.createElement("div");
+                div.className = "card";
+
+                //when the card is clicked take to the quiz
+                div.onclick = function() {
+                    location.href = `quiz.html?id=${quiz.id}`;
+                };
+
+                let innerHtml = `
+                <div class="container">
+                <h4><b>${quiz.id}</b></h4> 
+                <p>${quiz.title}</p>
+                <p>${quiz.questionIds.length} questions</p> 
+                </div>`;
+                div.innerHTML = innerHtml;
+                container.appendChild(div);
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,146 @@
+nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    background-color: crimson;
+    width: 100%;
+    top: 0;
+    left: 0;
+    position: fixed;
+}
+
+ul {
+    display: flex;
+    list-style: none;
+}
+
+ul li {
+    margin-right: 20px;
+}
+
+ul li a {
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 24px;
+}
+
+ul li a:hover,
+.about a:hover {
+    text-decoration: underline;
+}
+
+img {
+    display: block;
+    margin: 40px auto;
+    max-width: 30%;
+    height: auto;
+}
+
+.about a {
+    display: block;
+    padding: 10px 32px;
+    background-color: crimson;
+    color:white;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 24px;
+}
+
+.active,
+.about a.active {
+    text-decoration: underline;
+}
+
+.form-container {
+    margin-top: 80px;
+}
+
+#questions-container{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    padding: 20px;
+}
+
+.card {
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+    transition: 0.3s;
+    width: 20%;
+    border-radius: 5px;
+}
+
+.card:hover{
+    box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2);
+}
+
+.card-img{
+    border-radius: 5px 5px 0 0;
+}
+
+.container{
+    padding: 2px 16px;
+}
+
+.main-container{
+    display: flex;
+    margin-top: 80px;
+    gap: 20px;
+}
+
+
+.bank-container {
+    flex: 3;
+}
+
+.quiz{
+    flex: 2;
+}
+
+.quiz-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.quizzes {
+    margin-top: 80px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.quiz-page-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 90vh;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+#question-container {
+    width: 80%;
+    flex-grow: 1;
+}
+
+.controls {
+    width: 100%;
+    display: flex;
+    justify-content: space-around;
+}
+
+.bigger-card {
+    height: 70vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+    border-radius: 16px;
+    padding: 30px;
+}
+
+.invisible {
+    display: none;
+}

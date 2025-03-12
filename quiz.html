@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Taking Quiz Page</title>
+	<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <nav id="nav">
+        <ul>
+			<li><a href="index.html">Home</a></li>
+            <li><a href="addquestions.html">Add Questions</a></li>
+            <li><a href="createquiz.html">Create a Quiz</a></li>
+            <li><a href="takequiz.html">Take a Quiz</a></li>
+        </ul>
+		<div class="about"><a href="about.html">About</a></div>
+    </nav>
+
+    <div class="quiz-page-container">
+        <div id="question-container"></div>
+        <div id="controls" class="controls">
+            <button id="previous" onclick="previous()">Previous</button>
+            <label id="qLabel"></label>
+            <button id="next" onclick="next()">Next</button>
+        </div>
+    </div>
+
+    <script>
+        let host = "http://localhost:8080";
+        //get parameters from the url so we can get the id
+        const params = new URLSearchParams(window.location.search);
+        let quiz = null;
+        let currentQuestion = 0;
+        document.getElementById("nav").classList.add("invisible");
+        startQuiz();
+
+        let answers = {};
+
+        async function startQuiz() {
+            let response = await fetch(host + "/quizzes/" + params.get("id"));
+            quiz = await response.json();
+            await showQuestion(currentQuestion);
+        }
+
+        async function showQuestion(questionNum){
+            let question = quiz.questions[questionNum];
+
+            //put the question on the page
+            let container = document.getElementById("question-container");
+            container.innerHTML = "";
+            let div = document.createElement("div");
+            div.className = "bigger-card";
+            let innerHtml = `
+            <img class="card-img" src="http://localhost:8080/questions/${question.id}/image" alt="question" style="width:100%">
+            <div class="container">
+            <h4><b>${question.id}</b></h4> 
+            <p>${question.description}</p>
+            <form>
+                <input type="radio" id="optionA" name="question-${question.id}" value="A">
+                <label for="optionA" name="optionA">${question.choices[0]}</label><br>
+
+                <input type="radio" id="optionB" name="question-${question.id}" value="B">
+                <label for="optionB" name="optionB">${question.choices[1]}</label><br>
+
+                <input type="radio" id="optionC" name="question-${question.id}" value="C">
+                <label for="optionC" name="optionC">${question.choices[2]}</label><br>       
+            </form> 
+            </div>`;
+            div.innerHTML = innerHtml;
+            container.appendChild(div);
+
+            let qLabel = document.getElementById("qLabel");
+            qLabel.innerText = `Question ${questionNum + 1} out of ${quiz.questions.length}`;
+            //hide back button if on first question
+            if(currentQuestion == 0) {
+                document.getElementById("previous").hidden = true;
+            } 
+            else {
+                document.getElementById("previous").hidden = false;
+            }
+        }
+
+        async function next(){
+            updateAnswers(currentQuestion);
+            currentQuestion += 1;
+
+            //if it is last question then show the results
+            if(currentQuestion == quiz.questions.length) {
+                await showResults();
+            }
+            //otherwise show the next question
+            else{
+                showQuestion(currentQuestion);
+            }
+        }
+
+        async function previous(){
+            currentQuestion -= 1;
+            showQuestion(currentQuestion);
+        }
+
+        function updateAnswers(currentQuestion) {
+            let question = quiz.questions[currentQuestion];
+            let formData = new FormData(document.forms[0]);
+            let data = Object.fromEntries(formData);
+            switch(data[`question-${quiz.questions[currentQuestion].id}`]) {
+                case "A":
+                answers[currentQuestion] = question.choices[0];
+                    break;
+                case "B":
+                answers[currentQuestion] = question.choices[1];
+                    break;
+                case "C":
+                answers[currentQuestion] = question.choices[2];
+                    break;
+                default:
+                    answers[currentQuestion] = "wrong";
+            }        
+      }
+
+      async function showResults(){
+        let container = document.getElementById("question-container");
+        //hide controls and show the nav
+        document.getElementById("controls").classList.add("invisible");
+        document.getElementById("nav").classList.remove("invisible");
+
+        let score = 0;        
+        for(let i = 0; i < quiz.questions.length; ++i) {
+            let q = quiz.questions[i];
+            console.log(q.answer, answers[i]);
+            if(q.answer == answers[i]) {
+                score += 1;
+            }            
+        }        
+        container.innerHTML = "";
+        container.innerHTML += `<h4 class="form-container">You completed the quiz ${quiz.title}</h4>`;
+        container.innerHTML += `<h4>You scored ${score} out of ${quiz.questions.length}</h4>`;
+      }
+      
+    </script>
+</body>
+</html>
